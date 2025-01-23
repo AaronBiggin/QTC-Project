@@ -351,13 +351,90 @@ class QuantumRouter:
         program = self.initialize_program()
         for i,movements in enumerate(self.movement_list):
             layers = []
+    #maptolayercode             """
+    # Converts a list of qubit positions to a layer dictionary.
+
+    # Parameters:
+    # map (list): list of qubit positions.
+
+    # Returns:
+    # map: Dictionary representing the layer configuration.
+    # """
+    # return {
+    #     "qubits": [{
+    #         "id": i,
+    #         "a": 0,
+    #         "x": map[i][0],
+    #         "y": map[i][1],
+    #         "c": map[i][0],
+    #         "r": map[i][1],
+    #     } for i in range(len(map))],
+    #     "gates": []
+    # }
             layer = map_to_layer(self.embeddings[i])
+
             for mov in movements:
+        #            def update_layer(self, layer, movements):
+        # new_layer = copy.deepcopy(layer)
+        # for qubit, current_pos, next_pos in movements:
+        #     assert layer["qubits"][qubit]["id"] == qubit, "some error happen during layer generation"
+        #     assert layer["qubits"][qubit]["x"] == current_pos[0], f"layer have problem with location of qubit {qubit}, in x-axis"
+        #     assert layer["qubits"][qubit]["y"] == current_pos[1], f"layer have problem with location of qubit {qubit}, in y-axis"
+
+        #     new_layer["qubits"][qubit]["a"] = 1
+        #     layer["qubits"][qubit]["x"] = next_pos[0]
+        #     layer["qubits"][qubit]["y"] = next_pos[1]
+        #     layer["qubits"][qubit]["c"] = next_pos[0]
+        #     layer["qubits"][qubit]["r"] = next_pos[1]
+        # return new_layer
                 layers.append(self.update_layer(layer,mov))
+                
+#    def gates_in_layer(gate_list:list[list[int]])->list[dict[str, int]]:
+#     res = []
+#     if not gate_list:
+#         print("gate list does not exist")
+#     for i in range(len(gate_list)-1,-1,-1):
+#         assert len(gate_list[i]) == 2
+#         res.append({'id':i,'q0':gate_list[i][0],'q1':gate_list[i][1]})
+#     return res
+     
             layers[-1]["gates"] = gates_in_layer(self.gate_list[i+1])
+            #layers = self.generate_layers(layers)
+            pprint(layers)
             program += self.generate_program(layers)[2:]
+                    
         with open(filename, 'w') as file:
             json.dump(program, file)
+
+    def generate_layers(self, layers):
+        """
+        Modify layers such that every second layer interleaves the base layer into it.
+
+        Parameters:
+            base_layer (list): The initial layer with operations or qubits.
+            layers (list): A list of layers to modify.
+
+        Returns:
+            list: The updated list of layers with interleaved base layers every second layer.
+        """
+        num_layers = len(layers)
+        updated_layers = []
+
+        updated_layers.append(layers[0])
+        for i in range(num_layers-1):
+            updated_layers.append(layers[i+1])
+            updated_layers.append(layers[0])
+            updated_layers[2*(i+1)]['gates'] = []
+            for j in range(len(updated_layers[2*(i+1)]['qubits'])):
+                updated_layers[2*(i+1)]['qubits'][j]['a'] = 0
+        
+        #for j in range(2, len(updated_layers), 2):
+        #    updated_layers[j]['gates'] = []
+        #     for k in range(len(updated_layers[j]['qubits'])):
+        #         updated_layers[j]['qubits'][k]['a'] = 0
+
+            
+        return updated_layers
 
     def run(self) -> None:
         """
@@ -365,3 +442,16 @@ class QuantumRouter:
         """
         self.movement_list = []
         self.process_all_embeddings()
+
+##Layers Example:
+
+# {
+#     "qubits": [
+#         {"id": 0, "a": 0, "x": 0, "y": 0, "c": 0, "r": 0},
+#         {"id": 1, "a": 1, "x": 1, "y": 1, "c": 1, "r": 1},
+#         {"id": 2, "a": 0, "x": 2, "y": 0, "c": 2, "r": 0}
+#     ],
+#     "gates": [
+#         {"id": 0, "q0": 0, "q1": 1}
+#     ]
+# }
