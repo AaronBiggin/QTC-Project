@@ -2313,7 +2313,6 @@ if __name__ == "__main__":
     filename = args.input_file.split("/")[-1]
     filename = filename.split("_")
     num_qubit = int(filename[1])
-    trial = int(filename[2])
 
 
 

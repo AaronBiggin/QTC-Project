@@ -21,7 +21,7 @@ class DasAtom:
             raise FileNotFoundError(f"The specified directory does not exist: {circuit_folder}")
         self.cir_folder = circuit_folder
         if not save_folder:
-            save_folder = f"res/{self.bench_name}"
+            save_folder = f"results/{self.bench_name}"
         if os.path.exists(save_folder):
             warnings.warn(f"The results for '{self.bench_name}' may be overwritten. To avoid this, consider using a different result folder before 'process_files' with the function 'modify_result_folder'.")
         self.res_folder = save_folder
